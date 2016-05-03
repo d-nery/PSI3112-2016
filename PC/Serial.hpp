@@ -15,34 +15,28 @@ Turmas 7 e 8 - Grupo 1
 
 #pragma once
 
+#include <cstdlib>
+#include <cstring>
+#include <cstdint>
+#include <cstdio>
 #include <string>
 
-#include <ncurses.h>
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 namespace PSI {
-	enum InputType_t {
-		DC_VOLT = 0,
-		AC_VOLT,
-		DC_CURR
-	};
-
-	enum WaveForm_t {
-		SINE = 0,
-		TRIANGLE,
-		SQUARE,
-		SAWTOOTH,
-		DC
-	};
-
-	class Interface {
-		std::string msg;
-		int meiox;
-		int x;
+	class Serial {
+	private:
+		int fd;
+		struct termios tty;
 
 	public:
-		Interface();
-		~Interface();
-
-		void tela(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg);
+		Serial(std::string dev);
+		~Serial();
+		int read(std::string& str);
+		void write(std::string data);
 	};
 }

@@ -22,15 +22,51 @@ using namespace PSI;
 
 Multimetro mult;
 
-Serial pc(USBTX, USBRX);
+DigitalOut led_dcv(PTE21);
+DigitalOut led_acv(PTE29);
+DigitalOut led_dcc(PTD4);
+
+Serial     pc(USBTX, USBRX);
 
 int main() {
-	double volt;
+	double volt = 0;
+	WaveForm_t wave;
+
+	pc.baud(115200);
 
 	for (;;) {
-		volt = mult.getInput(DC_VOLT);
-		pc.printf("Valor raw:  %.2f\r\n", mult.aIn.read());
-		pc.printf("Valor lido: %.2f\r\n", volt);
-		wait(0.3);
+		switch (mult.getInputType()) {
+		case DC_VOLT:
+			led_dcv = 1;
+			led_acv = led_dcc = 0;
+			volt = mult.getInput(DC_VOLT, wave);
+			pc.printf("%di\r\n", DC_VOLT);
+			break;
+
+		case AC_VOLT:
+			led_acv = 1;
+			led_dcv = led_dcc = 0;
+			volt = mult.getInput(AC_VOLT, wave);
+			pc.printf("%di\r\n", AC_VOLT);
+			break;
+
+		case DC_CURR:
+			led_dcc = 1;
+			led_dcv = led_acv = 0;
+			volt = mult.getInput(DC_CURR, wave);
+			pc.printf("%di\r\n", DC_CURR);
+			break;
+
+		default:
+			volt = 0;
+			led_dcc = led_dcv = led_acv = 0;
+		}
+
+		pc.printf("%2.2fr\r\n", mult.aIn.read()); // Raw
+		pc.printf("%2.2fp\r\n", mult.pot.read()); // Pot
+		pc.printf("%2.2fv\r\n", volt);            // Out
+		pc.printf("%dw\r\n", wave);               // Waveform
+
+		wait_ms(100);
 	}
 }

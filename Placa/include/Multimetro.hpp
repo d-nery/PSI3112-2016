@@ -21,9 +21,13 @@ Turmas 7 e 8 - Grupo 1
 #define VCC 3.3
 
 // Ver Esquemático
-#define R1 (10 * 1000)
-#define R2 (10 * 1000)
-#define R3 (20 * 1000)
+#define R1 (9.69 * 1000)
+#define R2 (9.83 * 1000)
+#define R3 (19.47 * 1000)
+
+// #define R1 (10 * 1000)
+// #define R2 (10 * 1000)
+// #define R3 (20 * 1000)
 
 namespace PSI {
 	enum InputType_t {
@@ -32,15 +36,25 @@ namespace PSI {
 		DC_CURR
 	};
 
+	enum WaveForm_t {
+		SINE = 0,      // /sqrt(2)
+		TRIANGLE,      // /sqrt(3)
+		SQUARE,        // /sqrt(1)
+		SAWTOOTH,      // /sqrt(3)
+		DC             // /sqrt(1)
+	};
+
 	class Multimetro {
 	public:
 		Multimetro();
 
-		// void update();
+		double getInput(InputType_t input,WaveForm_t& wave);
+		double findVrms(double* ACVolts, WaveForm_t& wave);
 
-		double getInput(InputType_t input);
+		InputType_t getInputType();
 
 		AnalogIn aIn;
+		AnalogIn pot;
 	private:
 
 		double DCVolt;

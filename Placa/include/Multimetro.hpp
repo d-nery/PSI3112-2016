@@ -25,6 +25,11 @@ Turmas 7 e 8 - Grupo 1
 #define R2 (9.83 * 1000)
 #define R3 (19.47 * 1000)
 
+#define Rshunt (10)
+
+#define MINV 1.35
+#define VECTOR_SIZE 500
+
 // #define R1 (10 * 1000)
 // #define R2 (10 * 1000)
 // #define R3 (20 * 1000)

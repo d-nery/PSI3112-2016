@@ -23,16 +23,12 @@ namespace PSI {
 	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), pot(POT_IN) {}
 
 	double Multimetro::getInput(InputType_t input, WaveForm_t& wave) {
-		double ACVolts[1000]; // guarda as últimas 1000 medicoespara identificar o tipo de onda
+		double ACVolts[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoespara identificar o tipo de onda
 		switch (input) {
 			case AC_VOLT:
 				ACVolt = 0;
-				for (int j = 0; j < 1000; j++) {
-					for (int i = 0; i < 10; i++) {
-						ACVolt += aIn.read();
-						// wait_us(1);
-					}
-					ACVolt /= 10;
+				for (int j = 0; j < VECTOR_SIZE; j++) {
+					ACVolt = aIn.read();
 					ACVolts[j] = ACVolt;
 					wait_us(1); // Le 1 ms de onda (1 periodo a 1kHz)
 				}
@@ -41,13 +37,14 @@ namespace PSI {
 
 			case DC_VOLT:
 				DCVolt = 0;
-				for (int i = 0; i < 1000; i++) {
+				for (int i = 0; i < VECTOR_SIZE; i++) {
 					DCVolt += aIn.read();
 					wait_us(1);
 				}
-				DCVolt /= 1000;   // Media
+				DCVolt /= VECTOR_SIZE;   // Media
 				DCVolt = DCVolt * VCC; // Porcentagem de VCC
-				DCVolt = R3 * ((1./R1 + 1./R2 + 1./R3) * DCVolt - double(VCC)/R1); // Faz a correcao para 0-10 V - Ver Esquemático
+				// (VCC - MINV)/(Xlido - MINV) = (10/X)
+				DCVolt = 10./((VCC - MINV)/(DCVolt - MINV));
 				wave = DC;
 				return DCVolt;
 
@@ -74,11 +71,11 @@ namespace PSI {
 		double vrms = 0;
 		wave = SINE;
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < VECTOR_SIZE; i++) {
 			if (getInputType() != AC_VOLT)
 				return 0;
-			// pc.printf("%f\r\n", ACVolts[0] * VCC);
-			// wait_us(100);
+			pc.printf("%f\r\n", ACVolts[i] * VCC);
+			wait_ms(1);
 		}
 		wait(1);
 

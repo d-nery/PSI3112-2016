@@ -31,3 +31,6 @@
 
 build/
 mbed/
+
+*.txt
+*.cap

@@ -16,6 +16,7 @@ Turmas 7 e 8 - Grupo 1
 #include "Multimetro.hpp"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
 
 extern Serial pc;
 
@@ -23,35 +24,41 @@ namespace PSI {
 	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), pot(POT_IN) {}
 
 	double Multimetro::getInput(InputType_t input, WaveForm_t& wave) {
-		double ACVolts[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoespara identificar o tipo de onda
+		double ACVolts[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoes para identificar o tipo de onda
 		switch (input) {
 			case AC_VOLT:
 				ACVolt = 0;
 				for (int j = 0; j < VECTOR_SIZE; j++) {
 					ACVolt = aIn.read();
 					ACVolts[j] = ACVolt;
-					wait_us(1); // Le 1 ms de onda (1 periodo a 1kHz)
+					// wait_us(35);
 				}
 				ACVolt = findVrms(ACVolts, wave);
 				return ACVolt;
 
 			case DC_VOLT:
 				DCVolt = 0;
-				for (int i = 0; i < VECTOR_SIZE; i++) {
+				for (int i = 0; i < 1000; i++) {
 					DCVolt += aIn.read();
 					wait_us(1);
 				}
-				DCVolt /= VECTOR_SIZE;   // Media
-				DCVolt = DCVolt * VCC; // Porcentagem de VCC
+				DCVolt /= 1000;   // Media
+				// DCVolt = DCVolt * VCC; // Porcentagem de VCC
 				// (VCC - MINV)/(Xlido - MINV) = (10/X)
-				DCVolt = 10./((VCC - MINV)/(DCVolt - MINV));
+				DCVolt = 10. * double((DCVolt - MINV))/(MAXV - MINV);
 				wave = DC;
 				return DCVolt;
 
-			// @TODO Corrente DC
 			case DC_CURR:
-				DCCurrent = aIn.read();
 				wave = DC;
+				DCCurrent = 0;
+				for (int i = 0; i < 1000; i++) {
+					DCCurrent += aIn.read();
+				}
+				DCCurrent /= 1000;
+				// DCCurrent *= VCC * 1000; // mV
+				DCCurrent = 100. * double((DCCurrent - MINVI))/(MAXVI - MINVI);
+				// DCCurrent /= Rshunt;
 				return DCCurrent;
 		}
 		return 0.;
@@ -69,15 +76,37 @@ namespace PSI {
 	// @TODO Definir qual tipo de onda e definir o Vrms
 	double Multimetro::findVrms(double* ACVolts, WaveForm_t& wave) {
 		double vrms = 0;
+		// double _max = 0, _min = 0;
 		wave = SINE;
+
+		// for (int i = 0; i < VECTOR_SIZE; i++) {
+		// 	if (getInputType() != AC_VOLT)
+		// 		return 0;
+		// 	_max = max(_max, ACVolts[i]);
+		// 	_min = min(_min, ACVolts[i]);
+		// }
+		//
+		// for (int i = 0; i < VECTOR_SIZE; i++) {
+		// 	if (getInputType() != AC_VOLT)
+		// 		return 0;
+		// 	ACVolts[i] -= (_max + _min) / 2; // Tira offset
+		// 	ACVolts[i] *= (_max + _min) * 2; // Multiplica VCC
+		// 	vrms += ACVolts[i] * ACVolts[i];
+		// }
+		// vrms /= VECTOR_SIZE;
+		// vrms = sqrt(vrms);
 
 		for (int i = 0; i < VECTOR_SIZE; i++) {
 			if (getInputType() != AC_VOLT)
 				return 0;
-			pc.printf("%f\r\n", ACVolts[i] * VCC);
-			wait_ms(1);
+			vrms = max(vrms, ACVolts[i]);     // Acha o valor maximo da onda
 		}
-		wait(1);
+
+		vrms = 10. * double((vrms - MINV))/(MAXV - MINV);
+
+		vrms /= sqrt(2);
+
+		// wait(1);
 
 		return vrms;
 	}

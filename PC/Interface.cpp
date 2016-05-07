@@ -29,50 +29,76 @@ namespace PSI {
 		endwin();
 	}
 
-	void Interface::tela(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg) {
+	void Interface::update(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string klzmsg) {
 		clear();
+		x = 25;
+
+		info = newwin(5, 20, LINES / 2 - 3, meiox-10);
+		box(info, 0, 0);
 
 		switch (input) {
 			case DC_VOLT:
-				mvprintw(1, 0, "Medindo Tensão DC\n");
+				msg = "Medindo Tensão DC\n";
 				break;
 
 			case AC_VOLT:
-				mvprintw(1, 0, "Medindo Tensão AC\n");
+				msg = "Medindo Tensão AC\n";
 				break;
 
 			case DC_CURR:
-				mvprintw(1, 0, "Medindo Corrente DC\n");
+				msg = "Medindo Corrente DC\n";
 				break;
 		}
+		mvprintw(x++, meiox - msg.length()/2, msg.data());
 
 		switch (wave) {
 			case SINE:
-				printw("Onda Senoidal\n");
+				msg = "Onda Senoidal\n";
 				break;
 
 			case TRIANGLE:
-				printw("Onda Triangular\n");
+				msg = "Onda Triangular\n";
 				break;
 
 			case SAWTOOTH:
-				printw("Onda Dente de Serra\n");
+				msg = "Onda Dente de Serra\n";
 				break;
 
 			case SQUARE:
-				printw("Onda Quadrada\n");
+				msg = "Onda Quadrada\n";
 				break;
 
 			case DC:
-				printw("Sinal DC\n");
+				msg = "Sinal DC\n";
 				break;
 		}
+		mvprintw(x++, meiox - msg.length()/2, msg.data());
 
-		printw("Raw: %2.2f\n", raw);
-		printw("Pot: %2.2f\n", pot);
-		printw("Volt: %2.2f\n", volt);
-		printw("%s\n", msg.data());
+#ifdef DEBUG
+		mvprintw(1, 0, "Raw: %2.2f\n", raw);
+		mvprintw(2, 0, "Pot: %2.2f\n", pot);
+#endif
 
+		switch (input) {
+			case DC_VOLT:
+				msg = "Tensao: XX.XX V\n";
+				mvprintw(x++, meiox - msg.length()/2, "Tensao: %2.2f V\n", volt);
+				break;
+
+			case AC_VOLT:
+				msg = "Vrms: XX.XX V\n";
+				mvprintw(x++, meiox - msg.length()/2, "Vrms: %2.2f V\n", volt);
+				break;
+
+			case DC_CURR:
+				msg = "Corrente: XXX mA\n";
+				mvprintw(x++, meiox - msg.length()/2, "Corrente: %3.0f mA\n", volt);
+				break;
+		}
+		// mvprintw(x++, meiox - msg.length()/2, msg.data());
+		mvprintw(x++, meiox - klzmsg.length()/2, "%s\n", klzmsg.data());
+
+		wrefresh(info);
 		refresh();
 	}
 }

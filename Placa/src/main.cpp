@@ -41,7 +41,7 @@ int main() {
 			led_dcv = 1;
 			led_acv = led_dcc = 0;
 			volt = mult.getInput(DC_VOLT, wave);
-			// pc.printf("%di\r\n", DC_VOLT);
+			pc.printf("%di\r\n", DC_VOLT);
 			break;
 
 		case AC_VOLT:
@@ -51,11 +51,11 @@ int main() {
 			pc.printf("%di\r\n", AC_VOLT);
 			break;
 
-		case DC_CURR:
+		case DC_CURR: // Corrente em mA
 			led_dcc = 1;
 			led_dcv = led_acv = 0;
 			volt = mult.getInput(DC_CURR, wave);
-			// pc.printf("%di\r\n", DC_CURR);
+			pc.printf("%di\r\n", DC_CURR);
 			break;
 
 		default:
@@ -63,10 +63,10 @@ int main() {
 			led_dcc = led_dcv = led_acv = 0;
 		}
 
-		// pc.printf("%2.2fr\r\n", mult.aIn.read()); // Raw
-		// pc.printf("%2.2fp\r\n", mult.pot.read()); // Pot
-		// pc.printf("%2.2fv\r\n", volt);            // Out
-		// pc.printf("%dw\r\n", wave);               // Waveform
+		pc.printf("%2.4fr\r\n", mult.aIn.read()); // Raw
+		pc.printf("%2.4fp\r\n", mult.pot.read()); // Pot
+		pc.printf("%2.4fv\r\n", volt);            // Out
+		pc.printf("%dw\r\n", wave);               // Waveform
 
 		wait_ms(100);
 	}

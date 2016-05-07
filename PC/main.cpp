@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
 
 		for (;;) {
 			klz_msg_mtx.lock();
-			tela.tela(input, wave, values[0], values[1], values[2], klz_msg);
+			tela.update(input, wave, values[0], values[1], values[2], klz_msg);
 			klz_msg_mtx.unlock();
 
 			timeout(100);

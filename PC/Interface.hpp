@@ -35,6 +35,8 @@ namespace PSI {
 	};
 
 	class Interface {
+		WINDOW* info;
+
 		std::string msg;
 		int meiox;
 		int x;
@@ -43,6 +45,6 @@ namespace PSI {
 		Interface();
 		~Interface();
 
-		void tela(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg);
+		void update(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg);
 	};
 }

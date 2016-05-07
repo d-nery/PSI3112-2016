@@ -34,3 +34,6 @@ mbed/
 
 *.txt
 *.cap
+
+*.png
+*.jpg

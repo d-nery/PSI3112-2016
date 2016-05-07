@@ -25,10 +25,18 @@ Turmas 7 e 8 - Grupo 1
 #define R2 (9.83 * 1000)
 #define R3 (19.47 * 1000)
 
-#define Rshunt (10)
+#define Rshunt 32
 
-#define MINV 1.35
-#define VECTOR_SIZE 500
+
+// Valores determinados experimentalmente
+#define MINV 0.44     // Voltagem na saída (entrada da Freedom) com 0V
+#define MAXV 0.83     // Voltagem na saída (entrada da Freedom) com 10V
+
+#define MINVI 0.0040  // Voltagem na saída (entrada da Freedom) com 0 mA
+#define MAXVI 0.9965  // Voltagem na saída (entrada da Freedom) com 100 mA
+// Fim valores determinados experimentalmente
+
+#define VECTOR_SIZE 100
 
 // #define R1 (10 * 1000)
 // #define R2 (10 * 1000)

@@ -40,7 +40,7 @@ namespace PSI {
 				DCVolt = 0;
 				for (int i = 0; i < 1000; i++) {
 					DCVolt += aIn.read();
-					wait_us(1);
+					// wait_us(1);
 				}
 				DCVolt /= 1000;   // Media
 				// DCVolt = DCVolt * VCC; // Porcentagem de VCC

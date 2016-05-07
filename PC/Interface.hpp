@@ -45,6 +45,7 @@ namespace PSI {
 		Interface();
 		~Interface();
 
+		void printTitle();
 		void update(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg);
 	};
 }

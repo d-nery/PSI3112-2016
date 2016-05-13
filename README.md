@@ -16,3 +16,7 @@ Turmas 7 e 8 - Grupo 1
     Daniel Nery Silva de Oliveira ... 9349051
     Mateus Almeida Barbosa .......... 9349072
     Rubens Funabashi................. 9348939
+
+Bibliotecas usadas:
+* [mbed](https://developer.mbed.org/users/mbed_official/code/mbed/)
+* [mbed-rtos](https://developer.mbed.org/users/mbed_official/code/mbed-rtos/)

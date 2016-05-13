@@ -21,27 +21,31 @@ Turmas 7 e 8 - Grupo 1
 extern Serial pc;
 
 namespace PSI {
-	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), pot(POT_IN) {}
+	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), aIn2(DEF_IN), pot(POT_IN) {
+		medir.start();
+	}
 
 	double Multimetro::getInput(InputType_t input, WaveForm_t& wave) {
 		double ACVolts[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoes para identificar o tipo de onda
+		double ACVolts2[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoes para identificar o tipo de onda
 		switch (input) {
 			case AC_VOLT:
 				ACVolt = 0;
-				for (int j = 0; j < VECTOR_SIZE; j++) {
+				medir.reset();
+				for (int i = 0; i < VECTOR_SIZE; i++) {
+					while (medir.read_us() < 50);
+					medir.reset();
 					ACVolt = aIn.read();
-					ACVolts[j] = ACVolt;
-					// wait_us(35);
+					ACVolts[i] = ACVolt;
 				}
 				ACVolt = findVrms(ACVolts, wave);
 				return ACVolt;
 
 			case DC_VOLT:
 				DCVolt = 0;
-				for (int i = 0; i < 1000; i++) {
+				for (int i = 0; i < 1000; i++)
 					DCVolt += aIn.read();
-					// wait_us(1);
-				}
+
 				DCVolt /= 1000;   // Media
 				// DCVolt = DCVolt * VCC; // Porcentagem de VCC
 				// (VCC - MINV)/(Xlido - MINV) = (10/X)
@@ -52,25 +56,45 @@ namespace PSI {
 			case DC_CURR:
 				wave = DC;
 				DCCurrent = 0;
-				for (int i = 0; i < 1000; i++) {
+				for (int i = 0; i < 1000; i++)
 					DCCurrent += aIn.read();
-				}
+
 				DCCurrent /= 1000;
 				// DCCurrent *= VCC * 1000; // mV
 				DCCurrent = 100. * double((DCCurrent - MINVI))/(MAXVI - MINVI);
 				// DCCurrent /= Rshunt;
 				return DCCurrent;
+
+			// @TODO aqui
+			case DEFASAGEM:
+				Defasagem = 0;
+				medir.reset();
+				for (int i = 0; i < VECTOR_SIZE; i++) {
+					while (medir.read_us() < 50);
+					medir.reset();
+					ACVolt = aIn.read();
+					ACVolts[i] = ACVolt;
+
+					while (medir.read_us() < 50);       // Le a segunda medida 50us depois, subtrair isso ao final
+					medir.reset();
+					ACVolt = aIn2.read();
+					ACVolts2[i] = ACVolt;
+				}
+				Defasagem = findDef(ACVolts, ACVolts2, wave);
+				return Defasagem;
 		}
 		return 0.;
 	}
 
 	InputType_t Multimetro::getInputType() {
 		double val = pot.read();
-		if (val < 0.3)
+		if (val < 0.25)
 			return DC_VOLT;
-		if (val < 0.7)
+		if (val < 0.5)
 			return DC_CURR;
-		return AC_VOLT;
+		if (val < 0.75)
+			return AC_VOLT;
+		return DEFASAGEM;
 	}
 
 	// @TODO Definir qual tipo de onda e definir o Vrms
@@ -105,6 +129,17 @@ namespace PSI {
 		vrms = 10. * double((vrms - MINV))/(MAXV - MINV);
 
 		vrms /= sqrt(2);
+
+		// wait(1);
+
+		return vrms;
+	}
+
+	// @TODO aqui
+	double Multimetro::findDef(double* ACVolts, double* ACVolts2, WaveForm_t& wave) {
+		double vrms = 0;
+		// double _max = 0, _min = 0;
+		wave = SINE;
 
 		// wait(1);
 

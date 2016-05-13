@@ -46,7 +46,8 @@ namespace PSI {
 	enum InputType_t {
 		DC_VOLT = 0,
 		AC_VOLT,
-		DC_CURR
+		DC_CURR,
+		DEFASAGEM
 	};
 
 	enum WaveForm_t {
@@ -62,16 +63,21 @@ namespace PSI {
 		Multimetro();
 
 		double getInput(InputType_t input,WaveForm_t& wave);
-		double findVrms(double* ACVolts, WaveForm_t& wave);
 
 		InputType_t getInputType();
 
 		AnalogIn aIn;
+		AnalogIn aIn2;
 		AnalogIn pot;
 	private:
+		Timer medir;
 
 		double DCVolt;
 		double ACVolt;
+		double Defasagem;
 		double DCCurrent;
+
+		double findVrms(double* ACVolts, WaveForm_t& wave);
+		double findDef(double* ACVolts, double* ACVolts2, WaveForm_t& wave);
 	};
 }

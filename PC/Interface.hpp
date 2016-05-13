@@ -23,7 +23,8 @@ namespace PSI {
 	enum InputType_t {
 		DC_VOLT = 0,
 		AC_VOLT,
-		DC_CURR
+		DC_CURR,
+		DEFASAGEM
 	};
 
 	enum WaveForm_t {

@@ -16,4 +16,5 @@ Turmas 7 e 8 - Grupo 1
 #pragma once
 
 #define ADC_VOLT_IN PTB0
+#define DEF_IN      PTB1
 #define POT_IN      PTB2

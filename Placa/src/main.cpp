@@ -76,7 +76,7 @@ int main() {
 
 #ifdef PCDEBUG
 		pc.printf("%2.4fr\r\n", mult.aIn.read());  // Raw
-		pc.printf("%2.4fd\r\n", mult.aIn2.read()); // Raw Def
+		// pc.printf("%2.4fd\r\n", mult.aIn2.read()); // Raw Def
 		pc.printf("%2.4fp\r\n", mult.pot.read());  // Pot
 #endif
 

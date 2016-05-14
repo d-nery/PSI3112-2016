@@ -15,73 +15,72 @@ Turmas 7 e 8 - Grupo 1
 
 #include "Multimetro.hpp"
 
+
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
 extern Serial pc;
 
+// static Mutex mtx;
+static double ACVolts[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 1 e 2
+static bool start;
+
 namespace PSI {
-	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), aIn2(DEF_IN), pot(POT_IN) {
+	Multimetro::Multimetro() : aIn(ADC_VOLT_IN), pot(POT_IN), _medir(medicao) {
 		medir.start();
 	}
 
 	double Multimetro::getInput(InputType_t input, WaveForm_t& wave) {
-		double ACVolts[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoes para identificar o tipo de onda
-		double ACVolts2[VECTOR_SIZE]; // guarda as últimas VECTOR_SIZE medicoes para identificar o tipo de onda
+
 		switch (input) {
 			case AC_VOLT:
-				ACVolt = 0;
+				medida = 0;
 				medir.reset();
 				for (int i = 0; i < VECTOR_SIZE; i++) {
 					while (medir.read_us() < 50);
 					medir.reset();
-					ACVolt = aIn.read();
-					ACVolts[i] = ACVolt;
+					ACVolts[0][i] = aIn.read();
 				}
-				ACVolt = findVrms(ACVolts, wave);
-				return ACVolt;
+				medida = findVrms(ACVolts[0], wave);
+				return medida;
 
 			case DC_VOLT:
-				DCVolt = 0;
+				medida = 0;
 				for (int i = 0; i < 1000; i++)
-					DCVolt += aIn.read();
+					medida += aIn.read();
 
-				DCVolt /= 1000;   // Media
+				medida /= 1000;   // Media
 				// DCVolt = DCVolt * VCC; // Porcentagem de VCC
 				// (VCC - MINV)/(Xlido - MINV) = (10/X)
-				DCVolt = 10. * double((DCVolt - MINV))/(MAXV - MINV);
+				medida = 10. * double((medida - MINV))/(MAXV - MINV);
 				wave = DC;
-				return DCVolt;
+				return medida;
 
 			case DC_CURR:
 				wave = DC;
-				DCCurrent = 0;
+				medida = 0;
 				for (int i = 0; i < 1000; i++)
-					DCCurrent += aIn.read();
+					medida += aIn.read();
 
-				DCCurrent /= 1000;
+				medida /= 1000;
 				// DCCurrent *= VCC * 1000; // mV
-				DCCurrent = 100. * double((DCCurrent - MINVI))/(MAXVI - MINVI);
+				medida = 100. * double((medida - MINVI))/(MAXVI - MINVI);
 				// DCCurrent /= Rshunt;
-				return DCCurrent;
+				return medida;
 
-			// @TODO aqui
 			case DEFASAGEM:
-				Defasagem = 0;
+				medida = 0;
 				medir.reset();
+				start = true;
 				for (int i = 0; i < VECTOR_SIZE; i++) {
 					while (medir.read_us() < 50);
 					medir.reset();
-					ACVolt = aIn.read();
-					ACVolts[i] = ACVolt;
-
-					while (medir.read_us() < 50);       // Le a segunda medida 50us depois, subtrair isso ao final
-					medir.reset();
-					ACVolt = aIn2.read();
-					ACVolts2[i] = ACVolt;
+					ACVolts[0][i] = aIn.read();
 				}
-				Defasagem = findDef(ACVolts, ACVolts2, wave);
-				return Defasagem;
+				start = false;
+				wait_ms(1); //Espera para garantir que a outra medida tambem terminou
+				medida = findDef(ACVolts, wave);
+				return medida;
 		}
 		return 0.;
 	}
@@ -98,7 +97,7 @@ namespace PSI {
 	}
 
 	// @TODO Definir qual tipo de onda e definir o Vrms
-	double Multimetro::findVrms(double* ACVolts, WaveForm_t& wave) {
+	double Multimetro::findVrms(double ACVolts[VECTOR_SIZE], WaveForm_t& wave) {
 		double vrms = 0;
 		// double _max = 0, _min = 0;
 		wave = SINE;
@@ -136,13 +135,27 @@ namespace PSI {
 	}
 
 	// @TODO aqui
-	double Multimetro::findDef(double* ACVolts, double* ACVolts2, WaveForm_t& wave) {
-		double vrms = 0;
-		// double _max = 0, _min = 0;
+	double Multimetro::findDef(double ACVolts[2][VECTOR_SIZE], WaveForm_t& wave) {
+		double def = 0;
 		wave = SINE;
 
-		// wait(1);
+		return def;
+	}
 
-		return vrms;
+	void Multimetro::medicao(const void*) {
+		AnalogIn aIn2(DEF_IN);
+		Timer t;
+		t.start();
+
+		for (;;) {
+			while(!start);
+			t.reset();
+			for (int i = 0; i < VECTOR_SIZE; i++) {
+				while (t.read_us() < 50);
+				t.reset();
+				ACVolts[1][i] = aIn2.read();
+			}
+			start = false;
+		}
 	}
 }

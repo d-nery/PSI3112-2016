@@ -16,6 +16,7 @@ Turmas 7 e 8 - Grupo 1
 #pragma once
 
 #include "mbed.h"
+#include "rtos.h"
 #include "pins.h"
 
 #define VCC 3.3
@@ -26,7 +27,6 @@ Turmas 7 e 8 - Grupo 1
 #define R3 (19.47 * 1000)
 
 #define Rshunt 32
-
 
 // Valores determinados experimentalmente
 #define MINV 0.44     // Voltagem na saída (entrada da Freedom) com 0V
@@ -66,18 +66,19 @@ namespace PSI {
 
 		InputType_t getInputType();
 
+#ifndef PCDEBUG
+	private:  // So nao sao privados se for enviar pro PC
+#endif
 		AnalogIn aIn;
-		AnalogIn aIn2;
 		AnalogIn pot;
 	private:
 		Timer medir;
+		Thread _medir;
 
-		double DCVolt;
-		double ACVolt;
-		double Defasagem;
-		double DCCurrent;
+		double medida;
 
-		double findVrms(double* ACVolts, WaveForm_t& wave);
-		double findDef(double* ACVolts, double* ACVolts2, WaveForm_t& wave);
+		double findVrms(double ACVolts[VECTOR_SIZE], WaveForm_t& wave);  // Acha Vrms do conjunto de pontos ACVolts
+		double findDef(double ACVolts[2][VECTOR_SIZE], WaveForm_t& wave);  // Acha defasagem dos conjuntos de pontos ACVolts
+		static void medicao(const void*);                    // Funcao auxiliar que mede a segunda onda ao mesmo tempo da primeira
 	};
 }

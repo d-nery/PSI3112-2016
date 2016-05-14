@@ -47,7 +47,7 @@ MBED_PATH = .
 #Enabled/Disable mbed libraries
 USE_DSP  = false
 USE_FAT  = false
-USE_RTOS = false
+USE_RTOS = true
 USE_USB  = false
 
 # app headers directories
@@ -124,6 +124,7 @@ ifeq ($(USE_FAT), true)
 endif
 
 ifeq ($(USE_RTOS), true)
+		INC_DIRS += $(MBED_PATH)/rtos/TARGET_CORTEX_M
         INC_DIRS += $(MBED_PATH)/rtos
 endif
 

@@ -15,38 +15,23 @@ Turmas 7 e 8 - Grupo 1
 
 #pragma once
 
-#include <string>
-
-#include <ncurses.h>
-
 namespace PSI {
-	enum InputType_t {
-		DC_VOLT = 0,
-		AC_VOLT,
-		DC_CURR,
-		DEFASAGEM
-	};
-
 	enum WaveForm_t {
-		SINE = 0,
-		TRIANGLE,
-		SQUARE,
-		SAWTOOTH,
-		DC
+		SINE = 0,      // /sqrt(2)
+		TRIANGLE,      // /sqrt(3)
+		SQUARE,        // /sqrt(1)
+		SAWTOOTH,      // /sqrt(3)
+		DC             // /sqrt(1)
 	};
 
-	class Interface {
-		WINDOW* info;
-
-		std::string msg;
-		int meiox;
-		int x;
-
+	class Wave {
 	public:
-		Interface();
-		~Interface();
+		WaveForm_t form;
+		double frequency;
+		double periodo;
+		double Vrms;
 
-		void printTitle();
-		void update(InputType_t input, WaveForm_t wave, double raw, double pot, double volt, std::string msg);
+		Wave();
+		Wave& operator=(int);
 	};
 }

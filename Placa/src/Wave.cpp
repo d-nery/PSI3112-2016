@@ -13,30 +13,19 @@ Turmas 7 e 8 - Grupo 1
 	Rubens Funabashi                 9348939
 */
 
-#pragma once
-
-#include <cstdlib>
-#include <cstring>
-#include <cstdint>
-#include <cstdio>
-#include <string>
-
-#include <sys/ioctl.h>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
+#include "Wave.hpp"
 
 namespace PSI {
-	class Serial {
-	private:
-		int fd;
-		struct termios tty;
+	Wave::Wave() {
+		frequency = 0;
+		periodo = 0;
+		form = DC;
+		Vrms = 0;
+	}
 
-	public:
-		Serial(std::string dev);
-		~Serial();
-		int read(std::string& str);
-		void write(std::string data);
-	};
+	Wave& Wave::operator=(int a){
+		frequency = a;
+		Vrms = a;
+		return *this;
+	}
 }

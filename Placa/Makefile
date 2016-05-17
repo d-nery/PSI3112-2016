@@ -40,6 +40,8 @@ TARGET_FAMILY   = TARGET_KLXX
 TARGET_SPECIFIC = TARGET_KL25Z
 #TARGET_POST_BUILD_CHECK = ./frdm_kl25z_check_lock.py
 CPU             = cortex-m0plus
+DEBUG           =
+DEBUG           = -DPCDEBUG
 
 # path to the mbed library
 MBED_PATH = .
@@ -54,7 +56,7 @@ USE_USB  = false
 INC_DIRS = include
 
 # app source directories
-SRC_DIRS = src
+SRC_DIRS = src TextLCD
 
 # toolchain specific
 TOOLCHAIN = arm-none-eabi-
@@ -114,6 +116,9 @@ INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)
 INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)/$(TARGET_VENDOR)/$(TARGET_FAMILY)
 INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)/$(TARGET_VENDOR)/$(TARGET_FAMILY)/$(TARGET_SPECIFIC)
 
+INC_DIRS += $(MBED_PATH)/TextLCD
+
+
 ifeq ($(USE_DSP), true)
 	INC_DIRS += $(MBED_PATH)/dsp
 endif
@@ -156,8 +161,8 @@ COMPILER_OPTIONS += -mcpu=$(CPU) -MMD -MP $(CC_SYMBOLS)
 DEPEND_OPTS = -MF $(OBJ_FOLDER)$(@F:.o=.d)
 
 # Flags
-CFLAGS   = $(COMPILER_OPTIONS) $(DEPEND_OPTS) $(INC_DIRS_F) -std=gnu99 -c
-CXXFLAGS = $(COMPILER_OPTIONS) $(DEPEND_OPTS) $(INC_DIRS_F) -std=gnu++11 -c
+CFLAGS   = $(COMPILER_OPTIONS) $(DEPEND_OPTS) $(INC_DIRS_F) -std=gnu99 -c $(DEBUG)
+CXXFLAGS = $(COMPILER_OPTIONS) $(DEPEND_OPTS) $(INC_DIRS_F) -std=gnu++11 -c $(DEBUG)
 ASFLAGS  = $(COMPILER_OPTIONS) $(INC_DIRS_F) -c
 
 # Linker options

@@ -33,6 +33,7 @@ build/
 mbed/
 rtos/
 rtx/
+TextLCD/
 
 *.txt
 *.cap

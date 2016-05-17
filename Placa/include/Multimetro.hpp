@@ -17,7 +17,9 @@ Turmas 7 e 8 - Grupo 1
 
 #include "mbed.h"
 #include "rtos.h"
-#include "pins.h"
+// #include "TextLCD.h"
+
+#include "Wave.hpp"
 
 #define VCC 3.3
 
@@ -29,14 +31,19 @@ Turmas 7 e 8 - Grupo 1
 #define Rshunt 32
 
 // Valores determinados experimentalmente
-#define MINV 0.44     // Voltagem na saída (entrada da Freedom) com 0V
-#define MAXV 0.83     // Voltagem na saída (entrada da Freedom) com 10V
+#define MINV 0.438     // Voltagem na saída (entrada da Freedom) com 0V
+#define MAXV 0.835     // Voltagem na saída (entrada da Freedom) com 10V
+
+#define MINV2 0.442     // Voltagem na saída (entrada da Freedom) com 0V
+#define MAXV2 0.827     // Voltagem na saída (entrada da Freedom) co
 
 #define MINVI 0.0040  // Voltagem na saída (entrada da Freedom) com 0 mA
 #define MAXVI 0.9965  // Voltagem na saída (entrada da Freedom) com 100 mA
 // Fim valores determinados experimentalmente
 
 #define VECTOR_SIZE 100
+
+#define START_MEAS 1
 
 // #define R1 (10 * 1000)
 // #define R2 (10 * 1000)
@@ -47,38 +54,40 @@ namespace PSI {
 		DC_VOLT = 0,
 		AC_VOLT,
 		DC_CURR,
-		DEFASAGEM
-	};
-
-	enum WaveForm_t {
-		SINE = 0,      // /sqrt(2)
-		TRIANGLE,      // /sqrt(3)
-		SQUARE,        // /sqrt(1)
-		SAWTOOTH,      // /sqrt(3)
-		DC             // /sqrt(1)
+		DEFASAGEM,
+		IMPEDANCIA
 	};
 
 	class Multimetro {
 	public:
 		Multimetro();
 
-		double getInput(InputType_t input,WaveForm_t& wave);
+		Wave getInput(InputType_t input);
 
 		InputType_t getInputType();
+
+		// TextLCD lcd;
 
 #ifndef PCDEBUG
 	private:  // So nao sao privados se for enviar pro PC
 #endif
 		AnalogIn aIn;
+		AnalogIn aIn2;
+		AnalogIn currIn;
 		AnalogIn pot;
-	private:
-		Timer medir;
-		Thread _medir;
 
-		double medida;
+	private:
+		DigitalOut buzzer;   // Impedancia WHITE
+		Timer medir;
 
 		double findVrms(double ACVolts[VECTOR_SIZE], WaveForm_t& wave);  // Acha Vrms do conjunto de pontos ACVolts
-		double findDef(double ACVolts[2][VECTOR_SIZE], WaveForm_t& wave);  // Acha defasagem dos conjuntos de pontos ACVolts
-		static void medicao(const void*);                    // Funcao auxiliar que mede a segunda onda ao mesmo tempo da primeira
+		double findDef(double ACVolts1[2][VECTOR_SIZE], double ACVolts2[2][VECTOR_SIZE], WaveForm_t& wave);  // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
+
+		// Thread para ler canal 2 ao mesmo tempo
+		Thread* t;
+		static void threadStarter(void const*);
+		void medicao();                    // Funcao auxiliar que mede a segunda onda ao mesmo tempo da primeira
+	public:
+		void begin();
 	};
 }

@@ -18,3 +18,13 @@ Turmas 7 e 8 - Grupo 1
 #define ADC_VOLT_IN PTB0
 #define DEF_IN      PTB1
 #define POT_IN      PTB2
+#define CURR_IN     PTC1
+#define BUZZER      PTE3
+
+// LCD pins
+#define LCD_RX PTD5
+#define LCD_E  PTA13
+#define LCD_D4 PTC9
+#define LCD_D5 PTC8
+#define LCD_D6 PTA5
+#define LCD_D7 PTA4

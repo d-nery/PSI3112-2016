@@ -1,4 +1,4 @@
-# PSI312-2016
+# PSI3112-2016
 
 Escola Politecnica da Universidade de Sao Paulo
 
@@ -19,4 +19,3 @@ Turmas 7 e 8 - Grupo 1
 
 Bibliotecas usadas:
 * [mbed](https://developer.mbed.org/users/mbed_official/code/mbed/)
-<!-- * [mbed-rtos](https://developer.mbed.org/users/mbed_official/code/mbed-rtos/) -->

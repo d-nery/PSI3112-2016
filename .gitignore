@@ -34,6 +34,7 @@ mbed/
 rtos/
 rtx/
 TextLCD/
+FFT/
 
 *.txt
 *.cap

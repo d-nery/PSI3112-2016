@@ -56,7 +56,7 @@ USE_USB  = false
 INC_DIRS = include
 
 # app source directories
-SRC_DIRS = src TextLCD
+SRC_DIRS = src
 
 # toolchain specific
 TOOLCHAIN = arm-none-eabi-
@@ -115,8 +115,6 @@ INC_DIRS += $(MBED_PATH)/mbed
 INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)
 INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)/$(TARGET_VENDOR)/$(TARGET_FAMILY)
 INC_DIRS += $(MBED_PATH)/mbed/$(TARGET_BOARD)/$(TARGET_VENDOR)/$(TARGET_FAMILY)/$(TARGET_SPECIFIC)
-
-INC_DIRS += $(MBED_PATH)/TextLCD
 
 
 ifeq ($(USE_DSP), true)

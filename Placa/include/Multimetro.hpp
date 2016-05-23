@@ -16,7 +16,7 @@ Turmas 7 e 8 - Grupo 1
 #pragma once
 
 #include "mbed.h"
-#include "rtos.h"
+// #include "rtos.h"
 // #include "TextLCD.h"
 
 #include "Wave.hpp"
@@ -41,9 +41,7 @@ Turmas 7 e 8 - Grupo 1
 #define MAXVI 0.9965  // Voltagem na saída (entrada da Freedom) com 100 mA
 // Fim valores determinados experimentalmente
 
-#define VECTOR_SIZE 100
-
-#define START_MEAS 1
+#define VECTOR_SIZE 128
 
 // #define R1 (10 * 1000)
 // #define R2 (10 * 1000)
@@ -54,7 +52,7 @@ namespace PSI {
 		DC_VOLT = 0,
 		AC_VOLT,
 		DC_CURR,
-		DEFASAGEM,
+		// DEFASAGEM,
 		IMPEDANCIA
 	};
 
@@ -62,11 +60,9 @@ namespace PSI {
 	public:
 		Multimetro();
 
-		Wave getInput(InputType_t input);
+		void getInput(InputType_t input, Wave& wave1, Wave& wave2);
 
 		InputType_t getInputType();
-
-		// TextLCD lcd;
 
 #ifndef PCDEBUG
 	private:  // So nao sao privados se for enviar pro PC
@@ -77,17 +73,19 @@ namespace PSI {
 		AnalogIn pot;
 
 	private:
-		DigitalOut buzzer;   // Impedancia WHITE
+		DigitalOut buzzer;
 		Timer medir;
 
-		double findVrms(double ACVolts[VECTOR_SIZE], WaveForm_t& wave);  // Acha Vrms do conjunto de pontos ACVolts
-		double findDef(double ACVolts1[2][VECTOR_SIZE], double ACVolts2[2][VECTOR_SIZE], WaveForm_t& wave);  // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
+		double ACVolts1[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 1 e seu tempo
+		double ACVolts2[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 2 e seu tempo
 
-		// Thread para ler canal 2 ao mesmo tempo
-		Thread* t;
-		static void threadStarter(void const*);
-		void medicao();                    // Funcao auxiliar que mede a segunda onda ao mesmo tempo da primeira
-	public:
-		void begin();
+		void findVrms(Wave& wave1, Wave& wave2);  // Acha Vrms do conjunto de pontos ACVolts1 e 2
+		void findDef(Wave& wave1, Wave& wave2);   // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
+
+		// Status LEDs
+		DigitalOut led_dcv;   // DC Voltage RED
+		DigitalOut led_dcc;   // DC Current GREEN
+		DigitalOut led_acv;   // AC Voltage YELLOW
+		DigitalOut led_imp;   // Impedancia BLUE
 	};
 }

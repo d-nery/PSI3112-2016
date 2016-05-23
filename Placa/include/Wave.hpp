@@ -27,9 +27,11 @@ namespace PSI {
 	class Wave {
 	public:
 		WaveForm_t form;
-		double frequency;
+		double frequencia;
+		double amplitude;
 		double periodo;
 		double Vrms;
+		double def;
 
 		Wave();
 		Wave& operator=(int);

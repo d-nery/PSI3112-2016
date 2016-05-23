@@ -22,10 +22,6 @@ Turmas 7 e 8 - Grupo 1
 
 extern Serial pc;
 
-static Mutex mtx;
-static double ACVolts1[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 1 e seu tempo
-static double ACVolts2[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 2 e seu tempo
-
 namespace PSI {
 
 	Multimetro::Multimetro() :
@@ -33,78 +29,82 @@ namespace PSI {
 		aIn2(DEF_IN),
 		currIn(CURR_IN),
 		pot(POT_IN),
-		buzzer(BUZZER, 0)
+		buzzer(BUZZER, 0),
+		led_dcv(PTE29, 0),
+		led_dcc(PTE21, 0),
+		led_acv(PTE20, 0),
+		led_imp(PTE5,  0)
 		// lcd(LCD_RX, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7)
 	{
 		medir.start();
 	}
 
-	Wave Multimetro::getInput(InputType_t input) {
-		Wave wave;
+	void Multimetro::getInput(InputType_t input, Wave& wave1, Wave& wave2) {
 		switch (input) {
-			case AC_VOLT:
-				wave.Vrms = 0;
-				buzzer = 0;
-				medir.reset();
-				for (int i = 0; i < VECTOR_SIZE; i++) {
-					while (medir.read_us() < 50*i);
-					// medir.reset();
-					ACVolts1[0][i] = medir.read_us();
-					ACVolts1[1][i] = aIn.read();
-				}
-				wave.Vrms = findVrms(ACVolts1[1], wave.form);
-				return wave;
-
 			case DC_VOLT:
-				wave.Vrms = 0;
-				for (int i = 0; i < 1000; i++)
-					wave.Vrms += aIn.read();
+				led_dcv = 1;
+				led_acv = led_dcc = led_imp = 0;
 
-				wave.Vrms /= 1000;   // Media
-				buzzer = (wave.Vrms < MINV + 0.05 ? 1 : 0);
+				wave1.Vrms = 0;
+				for (int i = 0; i < 1000; i++)
+					wave1.Vrms += aIn.read();
+
+				wave1.Vrms /= 1000;   // Media
+				buzzer = (wave1.Vrms < MINV + 0.01 ? 1 : 0);
 				// DCVolt = DCVolt * VCC; // Porcentagem de VCC
 				// (VCC - MINV)/(Xlido - MINV) = (10/X)
-				wave.Vrms = 10. * double((wave.Vrms - MINV))/(MAXV - MINV);
-				wave.form = DC;
-				return wave;
+				wave1.Vrms = 10. * double((wave1.Vrms - MINV))/(MAXV - MINV);
+				wave1.form = DC;
+				return;
 
 			case DC_CURR:
-				wave.form = DC;
-				wave.Vrms = 0;
+				led_dcc = 1;
+				led_dcv = led_acv = led_imp = 0;
+
+				wave1.form = DC;
+				wave1.Vrms = 0;
 				buzzer = 0;
 				for (int i = 0; i < 1000; i++)
-					wave.Vrms += currIn.read();
+					wave1.Vrms += currIn.read();
 
-				wave.Vrms /= 1000;
+				wave1.Vrms /= 1000;
 				// DCCurrent *= VCC * 1000; // mV
-				wave.Vrms = 100. * double((wave.Vrms - MINVI))/(MAXVI - MINVI);
+				wave1.Vrms = 100. * double((wave1.Vrms - MINVI))/(MAXVI - MINVI);
 				// DCCurrent /= Rshunt;
-				return wave;
+				return;
 
-			case DEFASAGEM:
-				wave.Vrms = 0;
+			case AC_VOLT:
+				led_acv = 1;
+				led_dcv = led_dcc = led_imp = 0;
+
+				wave1.Vrms = 0;
 				buzzer = 0;
-				// t = new Thread(Multimetro::threadStarter, this);
 				medir.reset();
-				// start = true;
-				// t->signal_set(START_MEAS);
 				for (int i = 0; i < VECTOR_SIZE; i++) {
-					while (medir.read_us() < 50*i);
+					while (medir.read_us() < 100*i);
 					ACVolts1[0][i] = medir.read_us();
 					ACVolts1[1][i] = aIn.read();
+
+					ACVolts2[0][i] = medir.read_us();
+					ACVolts2[1][i] = aIn2.read();
 				}
-				// t->signal_clr(START_MEAS);
-				// start = false;
-				wait_ms(1); // Espera para garantir que a outra medicao tambem terminou
-				wave.Vrms = findDef(ACVolts1, ACVolts2, wave.form);
-				return wave;
+
+				findVrms(wave1, wave2);
+				findDef(wave1, wave2);
+				return;
 
 			case IMPEDANCIA:
+				led_imp = 1;
+				led_dcv = led_acv = led_dcc = 0;
+
 				buzzer = 0;
 				break;
+
+			default:
+				led_dcc = led_dcv = led_acv = led_imp = 0;
+				wave1 = 0;
+				wave2 = 0;
 		}
-		wave = 0;
-		return wave;
 	}
 
 	InputType_t Multimetro::getInputType() {
@@ -115,114 +115,61 @@ namespace PSI {
 			return DC_CURR;
 		if (val < 0.75)
 			return AC_VOLT;
-		return DEFASAGEM;
+		return IMPEDANCIA;
 	}
 
 	// @TODO Definir qual tipo de onda e definir o Vrms
-	double Multimetro::findVrms(double ACVolts[VECTOR_SIZE], WaveForm_t& wave) {
-		double vrms = 0;
-		// double _max = 0, _min = 0;
-		wave = SINE;
+	void Multimetro::findVrms(Wave& wave1, Wave& wave2) {
+		wave1 = 0;     // Reinicia as ondas
+		wave2 = 0;
 
-		// for (int i = 0; i < VECTOR_SIZE; i++) {
-		// 	if (getInputType() != AC_VOLT)
-		// 		return 0;
-		// 	_max = max(_max, ACVolts[i]);
-		// 	_min = min(_min, ACVolts[i]);
-		// }
-		//
-		// for (int i = 0; i < VECTOR_SIZE; i++) {
-		// 	if (getInputType() != AC_VOLT)
-		// 		return 0;
-		// 	ACVolts[i] -= (_max + _min) / 2; // Tira offset
-		// 	ACVolts[i] *= (_max + _min) * 2; // Multiplica VCC
-		// 	vrms += ACVolts[i] * ACVolts[i];
-		// }
-		// vrms /= VECTOR_SIZE;
-		// vrms = sqrt(vrms);
+		wave1.form = wave2.form = SINE; // Ondas Senoidais
 
 		for (int i = 0; i < VECTOR_SIZE; i++) {
-			if (getInputType() != AC_VOLT)
-				return 0;
-			vrms = max(vrms, ACVolts[i]);     // Acha o valor maximo da onda
+			ACVolts1[1][i] = 10. * double((ACVolts1[1][i] - MINV)) /(MAXV  - MINV);     // Mapeia as entradas para -10 - 10 V
+			ACVolts2[1][i] = 10. * double((ACVolts2[1][i] - MINV2))/(MAXV2 - MINV2);
+			wave1.amplitude = max(wave1.amplitude, ACVolts1[1][i]);     // Acha o valor maximo da onda
+			wave2.amplitude = max(wave2.amplitude, ACVolts2[1][i]);     // Acha o valor maximo da onda
 		}
 
-		vrms = 10. * double((vrms - MINV))/(MAXV - MINV);
-
-		vrms /= sqrt(2);
+		wave1.Vrms = wave1.amplitude / sqrt(2);
+		wave2.Vrms = wave2.amplitude / sqrt(2);
 
 		// wait(1);
-
-		return vrms;
 	}
 
-	// @TODO aqui
-	double Multimetro::findDef(double ACVolts1[2][VECTOR_SIZE], double ACVolts2[2][VECTOR_SIZE], WaveForm_t& wave) {
-		double def = 0;
-		double ampl1 = 0, tempo1 = 0.;
-		double ampl2 = 0, tempo2 = 0.;
-		int maxindex = 0, difftempo = 0;
-		wave = SINE;
+	void Multimetro::findDef(Wave& wave1, Wave& wave2) {
+		int index1 = 0, index2 = 0, pico1= 0, pico2 = 0;
 
-		for (int i = 0; i < VECTOR_SIZE; i++) {
-			if (getInputType() != DEFASAGEM)
-				return 0;
-			if (ampl1 < ACVolts1[1][i]) { // Acha o valor maximo da onda
-				ampl1 = ACVolts1[1][i];
-				tempo1 = ACVolts1[0][i];
-				maxindex = i;
-			}
-			// ampl2 = max(ampl2, ACVolts2[1][i]);     // Acha o valor maximo da onda
-			printf("%f %f\r\n", ACVolts1[0][i], ACVolts1[1][i]);
-			wait_ms(10);
+		// Canal1
+		if (ACVolts1[1][index1] > ACVolts1[1][index1 + 1]) { // Se comecar no meio de uma descida
+			for (; ACVolts1[1][index1] > ACVolts1[1][index1 + 1]; index1++); // Espera achar o primeiro vale
+			index1++;
 		}
-		wait_ms(100);
+		for (; ACVolts1[1][index1] < ACVolts1[1][index1 + 1]; index1++); // Espera achar primeiro pico
+		index2 = pico1 = index1;
+		for (; ACVolts1[1][index1] > ACVolts1[1][index1 + 1]; index1++); // Espera achar proximo vale
 
-		ampl2 = ACVolts2[1][maxindex];
-		for (int i = maxindex + 1; i < VECTOR_SIZE; i++) {
-			if (getInputType() != DEFASAGEM)
-				return 0;
-			if (ACVolts2[1][i] < ampl2)
-				break;
-			ampl2 = ACVolts2[1][i];
-			tempo2 = ACVolts2[0][i];
+		wave1.periodo = (ACVolts1[0][index1] - ACVolts1[0][index2]) * 2 * 1e-3; // Periodo em ms
+		wave1.frequencia =  1./(wave1.periodo * 1e-3);                          // Frequencia em Hz
+
+		// Canal2
+		index1 = 0, index2 = 0;
+		if (ACVolts2[1][index1] > ACVolts2[1][index1 + 1]) {
+			for (; ACVolts2[1][index1] > ACVolts2[1][index1 + 1]; index1++);
+			index1++;
 		}
+		for (; ACVolts2[1][index1] < ACVolts2[1][index1 + 1]; index1++);
+		index2 = pico2 = index1;
+		for (; ACVolts2[1][index1] > ACVolts2[1][index1 + 1]; index1++);
 
-		ampl1 = 10. * double((ampl1 - MINV))/(MAXV - MINV);
-		ampl2 = 10. * double((ampl2 - MINV2))/(MAXV2 - MINV2);
-		difftempo = tempo2 - tempo1;
+		wave2.periodo = (ACVolts2[0][index1] - ACVolts2[0][index2]) * 2 * 1e-3;
+		wave2.frequencia =  1./(wave2.periodo * 1e-3);
 
-		printf("%f\r\n", ampl1); // Amplitude Ch1
-		printf("%f\r\n", ampl2); // Amplitude Ch2
+		// Calcular defasagem
+		wave2.def = 360 * wave1.frequencia * (ACVolts2[0][pico2] - ACVolts1[0][pico1]) * 1e-6; // Defasagem em graus
+		wave2.def = (wave2.def < 0 ? 360 + wave2.def : wave2.def);
 
-		return def;
-	}
-
-	void Multimetro::begin() {
-		t = new Thread(Multimetro::threadStarter, this);
-	}
-
-	void Multimetro::medicao() {
-		Timer timer;
-		for (;;) {
-			// printf("start!\r\n");
-			// t->signal_wait(START_MEAS);
-			timer.reset();
-			for (int i = 0; i < VECTOR_SIZE; i++) {
-				while (timer.read_us() <= 50*i);
-				// timer.reset();
-				ACVolts2[0][i] = medir.read_us();
-				ACVolts2[1][i] = aIn2.read();
-			}
-			// mtx.lock();
-			// start = false;
-			// mtx.unlock();
-		}
-	}
-
-	void Multimetro::threadStarter(void const* p) {
-		Multimetro* inst = static_cast<Multimetro*>(const_cast<void*>(p));
-
-		inst->medicao();
+		return;
 	}
 }

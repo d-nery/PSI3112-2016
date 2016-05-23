@@ -17,15 +17,20 @@ Turmas 7 e 8 - Grupo 1
 
 namespace PSI {
 	Wave::Wave() {
-		frequency = 0;
-		periodo = 0;
+		frequencia = 0.;
+		amplitude = 0.;
+		periodo = 0.;
 		form = DC;
-		Vrms = 0;
+		Vrms = 0.;
+		def = 0.;
 	}
 
 	Wave& Wave::operator=(int a){
-		frequency = a;
+		frequencia = a;
+		amplitude = a;
+		periodo = a;
 		Vrms = a;
+		def = a;
 		return *this;
 	}
 }

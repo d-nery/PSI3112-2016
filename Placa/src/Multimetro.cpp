@@ -1,6 +1,6 @@
 /**
 Escola Politecnica da Universidade de Sao Paulo
-PSI312 - Laboratorio de Circuitos Eletricos - 2016
+PSI3112 - Laboratorio de Circuitos Eletricos - 2016
 
 Multimetro Digital Microcontrolado
 
@@ -45,16 +45,22 @@ namespace PSI {
 				led_dcv = 1;
 				led_acv = led_dcc = led_imp = 0;
 
-				wave1.Vrms = 0;
-				for (int i = 0; i < 1000; i++)
+				wave1 = 0;
+				wave2 = 0;
+				for (int i = 0; i < 1000; i++) {
 					wave1.Vrms += aIn.read();
+					wave2.Vrms += aIn2.read();
+				}
 
 				wave1.Vrms /= 1000;   // Media
-				buzzer = (wave1.Vrms < MINV + 0.01 ? 1 : 0);
+				wave2.Vrms /= 1000;   // Media
+				// buzzer = (wave1.Vrms < MINV + 0.01 ? 1 : 0);
 				// DCVolt = DCVolt * VCC; // Porcentagem de VCC
 				// (VCC - MINV)/(Xlido - MINV) = (10/X)
 				wave1.Vrms = 10. * double((wave1.Vrms - MINV))/(MAXV - MINV);
+				wave2.Vrms = 10. * double((wave2.Vrms - MINV2))/(MAXV2 - MINV2);
 				wave1.form = DC;
+				wave2.form = DC;
 				return;
 
 			case DC_CURR:

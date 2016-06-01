@@ -1,3 +1,18 @@
+  /**
+Escola Politecnica da Universidade de Sao Paulo
+PSI3112 - Laboratorio de Circuitos Eletricos - 2016
+
+Multimetro Digital Microcontrolado
+
+Turmas 7 e 8 - Grupo 1
+	Alexandre Henrique Costa Rossi   9348950
+	Arthur Gandelman                 9349176
+	Arthur Kenji Furuko Sakai        9349217
+	Daniel Nery Silva de Oliveira    9349051
+	Mateus Almeida Barbosa           9349072
+	Rubens Funabashi                 9348939
+*/
+
 import processing.serial.*;
 
 Serial port;
@@ -6,6 +21,8 @@ int input;
 
 FloatDict wave1;
 FloatDict wave2;
+
+Float[] meas;
 
 String text;
 
@@ -16,7 +33,7 @@ void setup() {
     size(800, 600);
     printArray(Serial.list());
 
-    port = new Serial(this, Serial.list()[0], 115200);
+    port = new Serial(this, Serial.list()[0], 9600);
     port.clear();
 
     text = port.readStringUntil('\n');
@@ -26,7 +43,7 @@ void setup() {
     logopoli.resize(100, 114);
     //logopsi = loadImage("psi.png");
 
-    wave1 = new FloatDict(); //Vrms, fase, frequencia, periodo, amplitude, form
+    wave1 = new FloatDict();
     wave1.set("Vrms", 0.0);
     wave1.set("def", 0.0);
     wave1.set("frequencia", 0.0);
@@ -34,13 +51,15 @@ void setup() {
     wave1.set("amplitude", 0.0);
     wave1.set("form", 0.0);
 
-    wave2 = new FloatDict(); //Vrms, fase, frequencia, periodo, amplitude, form
+    wave2 = new FloatDict();
     wave2.set("Vrms", 0.0);
     wave2.set("def", 0.0);
     wave2.set("frequencia", 0.0);
     wave2.set("periodo", 0.0);
     wave2.set("amplitude", 0.0);
     wave2.set("form", 0.0);
+    
+    meas = new Float[128];
 }
 
 void draw() {
@@ -51,14 +70,15 @@ void draw() {
     textSize(60);
     fill(29, 34, 232);
     textAlign(CENTER, CENTER);
-    text("PSImetro", width/2, height/2 - 150 - 30);
+    text("PSÍmetro", width/2, height/2 - 150 - 30);
 
     reader();
     textSize(30);
     switch(input) {
-     //switch(1) {
+    //  switch(1) {
         case 0:
-            text("Tensão DC: " + nf(wave1.get("Vrms"), 0, 2) + "V", width/2, height/2 - 150 + 35);
+            text("Tensão DC Ch1: " + nf(wave1.get("Vrms"), 0, 2) + "V", width/2, height/2 - 150 + 35);
+            text("Tensão DC Ch2: " + nf(wave2.get("Vrms"), 0, 2) + "V", width/2, height/2 - 150 + 85);
             break;
 
         case 3:
@@ -86,9 +106,9 @@ void draw() {
             text("Corrente DC: " + nf(round(wave1.get("Vrms"))) + "mA", width/2, height/2 - 150 + 35);
             break;
 
-        case 3:
+        //cas;e 3:
             //text("Impedancia: " + nf(wave1[0], 0, 2) + "ohm", width/2, height/2 - 150 + 35);
-            break;
+            //break;
     }
     delay(100);
     //fill(0, 102, 153, 51);

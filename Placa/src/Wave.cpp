@@ -1,6 +1,6 @@
 /**
 Escola Politecnica da Universidade de Sao Paulo
-PSI312 - Laboratorio de Circuitos Eletricos - 2016
+PSI3112 - Laboratorio de Circuitos Eletricos - 2016
 
 Multimetro Digital Microcontrolado
 

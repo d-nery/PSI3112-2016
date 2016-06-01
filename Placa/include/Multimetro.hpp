@@ -1,6 +1,6 @@
 /**
 Escola Politecnica da Universidade de Sao Paulo
-PSI312 - Laboratorio de Circuitos Eletricos - 2016
+PSI3112 - Laboratorio de Circuitos Eletricos - 2016
 
 Multimetro Digital Microcontrolado
 
@@ -31,14 +31,14 @@ Turmas 7 e 8 - Grupo 1
 #define Rshunt 32
 
 // Valores determinados experimentalmente
-#define MINV 0.438     // Voltagem na saída (entrada da Freedom) com 0V
-#define MAXV 0.835     // Voltagem na saída (entrada da Freedom) com 10V
+#define MINV  0.448144    // Voltagem na saída (entrada da Freedom) com 0V
+#define MAXV  0.882387   // Voltagem na saída (entrada da Freedom) com 10V
 
-#define MINV2 0.442     // Voltagem na saída (entrada da Freedom) com 0V
-#define MAXV2 0.827     // Voltagem na saída (entrada da Freedom) co
+#define MINV2 0.452034     // Voltagem na saída (entrada da Freedom) com 0V
+#define MAXV2 0.863714    // Voltagem na saída (entrada da Freedom) co
 
-#define MINVI 0.0040  // Voltagem na saída (entrada da Freedom) com 0 mA
-#define MAXVI 0.9965  // Voltagem na saída (entrada da Freedom) com 100 mA
+#define MINVI 0.258238  // Voltagem na saída (entrada da Freedom) com 0 mA
+#define MAXVI 0.735067 // Voltagem na saída (entrada da Freedom) com 100 mA
 // Fim valores determinados experimentalmente
 
 #define VECTOR_SIZE 128

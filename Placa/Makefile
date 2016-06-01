@@ -41,7 +41,7 @@ TARGET_SPECIFIC = TARGET_KL25Z
 #TARGET_POST_BUILD_CHECK = ./frdm_kl25z_check_lock.py
 CPU             = cortex-m0plus
 DEBUG           =
-DEBUG           = -DPCDEBUG
+# DEBUG           = -DPCDEBUG
 
 # path to the mbed library
 MBED_PATH = .

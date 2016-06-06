@@ -18,14 +18,14 @@ Turmas 7 e 8 - Grupo 1
 
 #include "Multimetro.hpp"
 
-using namespace PSI;
+using namespace PSImetro;
 
 Multimetro mult;
 
-DigitalOut led_blue(LED_BLUE, 1);
+DigitalOut led_blue(LED_BLUE, 1); // So para mostrar que esta ligado
 
-// Serial     pc(USBTX, USBRX);
-Serial     bt(PTE0, PTE1);
+// Serial     bt(USBTX, USBRX);
+Serial     bt(PTE0, PTE1);   // Bluetooth
 
 int main() {
 	Wave wave1, wave2;
@@ -39,45 +39,26 @@ int main() {
 	for (;;) {
 		input = mult.getInputType();
 		mult.getInput(input, wave1, wave2);
-		bt.printf("%di\r\n", input);
+		// bt.printf("%di\r\n", input);
 		wait_us(1000);
 
 #ifdef PCDEBUG
-		bt.printf("Ch1:  %2.4fl\r\n", mult.aIn.read());     // Raw Ch1
+		bt.printf("Ch1:  %2.4fl\r\n", mult.aIn.read());    // Raw Ch1
 		wait_us(1000);
-		bt.printf("Ch2:  %2.4fl\r\n", mult.aIn2.read());    // Raw Ch2
+		bt.printf("Ch2:  %2.4fl\r\n", mult.aIn2.read());   // Raw Ch2
 		wait_us(1000);
 		bt.printf("Curr: %2.4fl\r\n", mult.currIn.read()); // Raw Curr
 		wait_us(1000);
-		bt.printf("Pot:  %2.4fl\r\n", mult.pot.read());      // Pot
+		bt.printf("Pot:  %2.4fl\r\n", mult.pot.read());    // Pot
 		wait_us(1000);
 #endif
 
-		bt.printf("%2.4fq\r\n", wave1.Vrms);
-		wait_us(1000);
-		bt.printf("%2.4fe\r\n", wave1.frequencia);
-		wait_us(1000);
-		bt.printf("%2.4fr\r\n", wave1.periodo);
-		wait_us(1000);
-		bt.printf("%2.4ft\r\n", wave1.amplitude);
-		wait_us(1000);
+		// Input,Vrms,def,freq,per,ampl,[0|1],w
+		bt.printf("%d,%2.4f,%.1f,%2.4f,%2.4f,%2.4f,0,w\r\n",
+			input, wave1.Vrms, wave1.def, wave1.frequencia, wave1.periodo, wave1.amplitude);
 
-		bt.printf("%2.4fa\r\n", wave2.Vrms);
-		wait_us(1000);
-		bt.printf("%2.4fd\r\n", wave2.frequencia);
-		wait_us(1000);
-		bt.printf("%2.4ff\r\n", wave2.periodo);
-		wait_us(1000);
-		bt.printf("%2.4fg\r\n", wave2.amplitude);
-		wait_us(1000);
-
-		bt.printf("%.1fh\r\n", wave2.def);
-		wait_us(1000);
-
-		bt.printf("%dz\r\n", wave1.form);                // Waveform
-		wait_us(1000);
-		bt.printf("%dx\r\n", wave2.form);                // Waveform
-		wait_us(1000);
+		bt.printf("%d,%2.4f,%.1f,%2.4f,%2.4f,%2.4f,1,w\r\n",
+		 	input, wave2.Vrms, wave2.def, wave2.frequencia, wave2.periodo, wave2.amplitude);
 
 		wait_ms(100);
 	}

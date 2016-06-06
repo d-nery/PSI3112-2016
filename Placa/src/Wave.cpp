@@ -15,7 +15,7 @@ Turmas 7 e 8 - Grupo 1
 
 #include "Wave.hpp"
 
-namespace PSI {
+namespace PSImetro {
 	Wave::Wave() {
 		frequencia = 0.;
 		amplitude = 0.;

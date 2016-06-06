@@ -20,9 +20,9 @@ Turmas 7 e 8 - Grupo 1
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
-extern Serial pc;
+extern Serial bt;
 
-namespace PSI {
+namespace PSImetro {
 
 	Multimetro::Multimetro() :
 		aIn(ADC_VOLT_IN),
@@ -32,8 +32,7 @@ namespace PSI {
 		buzzer(BUZZER, 0),
 		led_dcv(PTE29, 0),
 		led_dcc(PTE21, 0),
-		led_acv(PTE20, 0),
-		led_imp(PTE5,  0)
+		led_acv(PTE20, 0)
 		// lcd(LCD_RX, LCD_E, LCD_D4, LCD_D5, LCD_D6, LCD_D7)
 	{
 		medir.start();
@@ -43,7 +42,7 @@ namespace PSI {
 		switch (input) {
 			case DC_VOLT:
 				led_dcv = 1;
-				led_acv = led_dcc = led_imp = 0;
+				led_acv = led_dcc = 0;
 
 				wave1 = 0;
 				wave2 = 0;
@@ -65,7 +64,7 @@ namespace PSI {
 
 			case DC_CURR:
 				led_dcc = 1;
-				led_dcv = led_acv = led_imp = 0;
+				led_dcv = led_acv = 0;
 
 				wave1.form = DC;
 				wave1.Vrms = 0;
@@ -81,7 +80,7 @@ namespace PSI {
 
 			case AC_VOLT:
 				led_acv = 1;
-				led_dcv = led_dcc = led_imp = 0;
+				led_dcv = led_dcc = 0;
 
 				wave1.Vrms = 0;
 				buzzer = 0;
@@ -97,17 +96,19 @@ namespace PSI {
 
 				findVrms(wave1, wave2);
 				findDef(wave1, wave2);
+				// findImpedance(wave1, wave2);
+
+				for (int i = 0; i < VECTOR_SIZE; i++) {
+					bt.printf("%d,%.1f,%.4f,%d,1,0,0,d\r\n",
+						AC_VOLT, ACVolts1[0][i], ACVolts1[1][i], i);
+					bt.printf("%d,%.1f,%.4f,%d,2,0,0,d\r\n",
+						AC_VOLT, ACVolts2[0][i], ACVolts2[1][i], i);
+				}
+
 				return;
 
-			case IMPEDANCIA:
-				led_imp = 1;
-				led_dcv = led_acv = led_dcc = 0;
-
-				buzzer = 0;
-				break;
-
 			default:
-				led_dcc = led_dcv = led_acv = led_imp = 0;
+				led_dcc = led_dcv = led_acv = 0;
 				wave1 = 0;
 				wave2 = 0;
 		}
@@ -115,13 +116,11 @@ namespace PSI {
 
 	InputType_t Multimetro::getInputType() {
 		double val = pot.read();
-		if (val < 0.25)
+		if (val < 0.3)
 			return DC_VOLT;
-		if (val < 0.5)
+		if (val < 0.7)
 			return DC_CURR;
-		if (val < 0.75)
-			return AC_VOLT;
-		return IMPEDANCIA;
+		return AC_VOLT;
 	}
 
 	// @TODO Definir qual tipo de onda e definir o Vrms
@@ -148,7 +147,7 @@ namespace PSI {
 		int index1 = 0, index2 = 0, pico1= 0, pico2 = 0;
 
 		// Canal1
-		if (ACVolts1[1][index1] > ACVolts1[1][index1 + 1]) { // Se comecar no meio de uma descida
+		if (ACVolts1[1][index1] > ACVolts1[1][index1 + 1]) {                 // Se comecar no meio de uma descida
 			for (; ACVolts1[1][index1] > ACVolts1[1][index1 + 1]; index1++); // Espera achar o primeiro vale
 			index1++;
 		}

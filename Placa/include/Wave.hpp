@@ -15,7 +15,7 @@ Turmas 7 e 8 - Grupo 1
 
 #pragma once
 
-namespace PSI {
+namespace PSImetro {
 	enum WaveForm_t {
 		SINE = 0,      // /sqrt(2)
 		TRIANGLE,      // /sqrt(3)

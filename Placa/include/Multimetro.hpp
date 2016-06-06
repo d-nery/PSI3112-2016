@@ -16,7 +16,6 @@ Turmas 7 e 8 - Grupo 1
 #pragma once
 
 #include "mbed.h"
-// #include "rtos.h"
 // #include "TextLCD.h"
 
 #include "Wave.hpp"
@@ -24,11 +23,12 @@ Turmas 7 e 8 - Grupo 1
 #define VCC 3.3
 
 // Ver Esquemático
-#define R1 (9.69 * 1000)
-#define R2 (9.83 * 1000)
-#define R3 (19.47 * 1000)
+#define R1 (09.69 * 1000)
+#define R2 (09.83 * 1000)
+#define R3 (32.56 * 1000)
 
 #define Rshunt 32
+#define RImp   1000
 
 // Valores determinados experimentalmente
 #define MINV  0.448144    // Voltagem na saída (entrada da Freedom) com 0V
@@ -47,13 +47,13 @@ Turmas 7 e 8 - Grupo 1
 // #define R2 (10 * 1000)
 // #define R3 (20 * 1000)
 
-namespace PSI {
+namespace PSImetro {
 	enum InputType_t {
 		DC_VOLT = 0,
 		AC_VOLT,
-		DC_CURR,
+		DC_CURR
 		// DEFASAGEM,
-		IMPEDANCIA
+		// IMPEDANCIA
 	};
 
 	class Multimetro {
@@ -79,13 +79,13 @@ namespace PSI {
 		double ACVolts1[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 1 e seu tempo
 		double ACVolts2[2][VECTOR_SIZE];  // guarda as últimas VECTOR_SIZE medicoes das entrada 2 e seu tempo
 
-		void findVrms(Wave& wave1, Wave& wave2);  // Acha Vrms do conjunto de pontos ACVolts1 e 2
-		void findDef(Wave& wave1, Wave& wave2);   // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
+		void findVrms(Wave& wave1, Wave& wave2);        // Acha Vrms do conjunto de pontos ACVolts1 e 2
+		void findDef(Wave& wave1, Wave& wave2);         // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
+		void findImpedance(Wave& wave1, Wave& wave2);   // Acha a impedancia medida no canal1 com base na tensao no canal 2
 
 		// Status LEDs
 		DigitalOut led_dcv;   // DC Voltage RED
 		DigitalOut led_dcc;   // DC Current GREEN
 		DigitalOut led_acv;   // AC Voltage YELLOW
-		DigitalOut led_imp;   // Impedancia BLUE
 	};
 }

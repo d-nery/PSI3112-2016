@@ -31,14 +31,14 @@ Turmas 7 e 8 - Grupo 1
 #define RImp   1000
 
 // Valores determinados experimentalmente
-#define MINV  0.448144    // Voltagem na saída (entrada da Freedom) com 0V
-#define MAXV  0.882387   // Voltagem na saída (entrada da Freedom) com 10V
+#define MINV  0.448144  // Tensão na saída (entrada da Freedom) com 0V
+#define MAXV  0.882387  // Tensão na saída (entrada da Freedom) com 10V
 
-#define MINV2 0.452034     // Voltagem na saída (entrada da Freedom) com 0V
-#define MAXV2 0.863714    // Voltagem na saída (entrada da Freedom) co
+#define MINV2 0.452034  // Tensão na saída (entrada da Freedom) com 0V
+#define MAXV2 0.863714  // Tensão na saída (entrada da Freedom) com 10V
 
-#define MINVI 0.258238  // Voltagem na saída (entrada da Freedom) com 0 mA
-#define MAXVI 0.735067 // Voltagem na saída (entrada da Freedom) com 100 mA
+#define MINVI 0.258238  // Tensão na saída (entrada da Freedom) com 0 mA
+#define MAXVI 0.735067  // Tensão na saída (entrada da Freedom) com 100 mA
 // Fim valores determinados experimentalmente
 
 #define VECTOR_SIZE 128
@@ -48,7 +48,7 @@ Turmas 7 e 8 - Grupo 1
 // #define R3 (20 * 1000)
 
 namespace PSImetro {
-	enum InputType_t {
+	enum InputType_t {  // Tipos de Entrada
 		DC_VOLT = 0,
 		AC_VOLT,
 		DC_CURR
@@ -81,7 +81,7 @@ namespace PSImetro {
 
 		void findVrms(Wave& wave1, Wave& wave2);        // Acha Vrms do conjunto de pontos ACVolts1 e 2
 		void findDef(Wave& wave1, Wave& wave2);         // Acha defasagem dos conjuntos de pontos ACVolts1 e 2
-		void findImpedance(Wave& wave1, Wave& wave2);   // Acha a impedancia medida no canal1 com base na tensao no canal 2
+		// void findImpedance(Wave& wave1, Wave& wave2);   // Acha a impedancia medida no canal1 com base na tensao no canal 2
 
 		// Status LEDs
 		DigitalOut led_dcv;   // DC Voltage RED

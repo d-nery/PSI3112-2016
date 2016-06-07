@@ -25,6 +25,10 @@ int time = 6400;
 int ampl, deslocx, deslocy;
 int input;
 
+final short DC_VOLT = 0;
+final short AC_VOLT = 1;
+final short DC_CURR = 2;
+
 Float[][] dados1, dados2;
 FloatDict[] wave;
 
@@ -35,7 +39,8 @@ void setup() {
     control = new ControlP5(this);
     mult = new Multimetro();
 
-    port = new Serial(this, "/dev/rfcomm0", 9600);
+    println(Serial.list()[0]);
+    port = new Serial(this, Serial.list()[0], 9600);
     port.clear();
 
     logopoli = loadImage("./Poli.png");
@@ -108,7 +113,7 @@ void setup() {
          .setColorForeground(color(245))
          .setColorBackground(color(90))
          .setColorActive(color(255));
-         
+
     port.bufferUntil('\n');
 }
 
@@ -124,6 +129,7 @@ void serialEvent(Serial p) {
 
     temp = p.readString();
     temp = trim(temp);
+    //println(temp);
     String[] vals = split(temp, ',');
     //println(vals.length);
     if (vals.length != 8)
@@ -131,7 +137,7 @@ void serialEvent(Serial p) {
     //println(vals);
     input = int(vals[0]);
     if (vals[7].equals("d")) {
-        if (vals[4].equals("1")) {    
+        if (vals[4].equals("1")) {
             i = int(vals[3]);
             dados1[0][i] = float(vals[1]);
             dados1[1][i] = float(vals[2]);
@@ -166,10 +172,12 @@ class Multimetro {
 
     void update() {
         telaOnda.show();
-        if (input == 1)
+        if (input == AC_VOLT)
             telaOnda.points();
-        telaCh1.update();
-        telaCh2.update();
+        if (input != DC_CURR) {
+            telaCh1.update();
+            telaCh2.update();
+        }
         outros.update();
     }
 }
@@ -219,10 +227,14 @@ class Canal {
 
         pushMatrix();
             translate(esquerda + 40, topo);
-            text("Amplitude: "    + nf(wave[num-1].get("amplitude"),  0, 2) + "V",  0, 1*(tamlat)/5);
-            text("Período: "      + nf(wave[num-1].get("periodo"),    0, 2) + "ms", 0, 2*(tamlat)/5);
-            text("Frequencia: "   + nf(wave[num-1].get("frequencia"), 0, 1) + "Hz", 0, 3*(tamlat)/5);
-            text("Valor Eficaz: " + nf(wave[num-1].get("Vrms"),       0, 2) + "V",  0, 4*(tamlat)/5);
+            if (input == AC_VOLT) {
+                text("Amplitude: "    + nf(wave[num-1].get("amplitude"),  0, 2) + "V",  0, 1*(tamlat)/5);
+                text("Período: "      + nf(wave[num-1].get("periodo"),    0, 2) + "ms", 0, 2*(tamlat)/5);
+                text("Frequencia: "   + nf(wave[num-1].get("frequencia"), 0, 1) + "Hz", 0, 3*(tamlat)/5);
+                text("Valor Eficaz: " + nf(wave[num-1].get("Vrms"),       0, 2) + "V",  0, 4*(tamlat)/5);
+            } else {
+                text("Tensão DC: " + nf(wave[num-1].get("Vrms"),       0, 2) + "V",  0, 1*(tamlat)/2);
+            }
         popMatrix();
     }
 }
@@ -254,7 +266,7 @@ class Info {
         line(esquerda + 30, topo, esquerda + 30, base);
 
         fill(255);
-        
+
         textSize(60);
         textAlign(CENTER, TOP);
         text("PSImetro", width*0.15, height*0.04);
@@ -274,10 +286,14 @@ class Info {
 
         pushMatrix();
             translate(esquerda + 40, topo);
-            text("Defasagem:  X.XX°", 0, 1*(tamlat)/3);
-            text("Impedancia: X.XXΩ", 0, 2*(tamlat)/3);
+            if (input == AC_VOLT) {
+                text("Defasagem: " + nf(wave[1].get("def")) + "°", 0, 1*(tamlat)/3);
+                text("Impedancia: Ω", 0, 2*(tamlat)/3);
+            }
+            if (input == DC_CURR)
+                text("Corrente: " + nf(wave[0].get("Vrms")) + "mA", 0, 1*(tamlat)/2);
         popMatrix();
-        
+
         textSize(32);
         textAlign(CENTER, TOP);
         String text = (input == 1 ? "AC" : "DC");

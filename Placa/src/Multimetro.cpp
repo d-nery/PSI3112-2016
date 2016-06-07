@@ -98,13 +98,12 @@ namespace PSImetro {
 				findDef(wave1, wave2);
 				// findImpedance(wave1, wave2);
 
-				for (int i = 0; i < VECTOR_SIZE; i++) {
+				for (int i = 0; i < VECTOR_SIZE && getInputType() == AC_VOLT; i++) {
 					bt.printf("%d,%.1f,%.4f,%d,1,0,0,d\r\n",
 						AC_VOLT, ACVolts1[0][i], ACVolts1[1][i], i);
 					bt.printf("%d,%.1f,%.4f,%d,2,0,0,d\r\n",
 						AC_VOLT, ACVolts2[0][i], ACVolts2[1][i], i);
 				}
-
 				return;
 
 			default:

@@ -22,7 +22,7 @@ using namespace PSImetro;
 
 Multimetro mult;
 
-DigitalOut led_blue(LED_BLUE, 1); // So para mostrar que esta ligado
+DigitalOut led_blue(LED_BLUE, 0); // So para mostrar que esta ligado
 
 // Serial     bt(USBTX, USBRX);
 Serial     bt(PTE0, PTE1);   // Bluetooth
@@ -37,21 +37,11 @@ int main() {
 	wait(2);
 
 	for (;;) {
+#ifndef PCDEBUG
 		input = mult.getInputType();
 		mult.getInput(input, wave1, wave2);
 		// bt.printf("%di\r\n", input);
 		wait_us(1000);
-
-#ifdef PCDEBUG
-		bt.printf("Ch1:  %2.4fl\r\n", mult.aIn.read());    // Raw Ch1
-		wait_us(1000);
-		bt.printf("Ch2:  %2.4fl\r\n", mult.aIn2.read());   // Raw Ch2
-		wait_us(1000);
-		bt.printf("Curr: %2.4fl\r\n", mult.currIn.read()); // Raw Curr
-		wait_us(1000);
-		bt.printf("Pot:  %2.4fl\r\n", mult.pot.read());    // Pot
-		wait_us(1000);
-#endif
 
 		// Input,Vrms,def,freq,per,ampl,[0|1],w
 		bt.printf("%d,%2.4f,%.1f,%2.4f,%2.4f,%2.4f,0,w\r\n",
@@ -60,6 +50,25 @@ int main() {
 		bt.printf("%d,%2.4f,%.1f,%2.4f,%2.4f,%2.4f,1,w\r\n",
 		 	input, wave2.Vrms, wave2.def, wave2.frequencia, wave2.periodo, wave2.amplitude);
 
+#else
+		double m1 = 0., m2 = 0., m3 = 0.;
+		for (int i = 0; i < 1000; i++) {
+			m1 += mult.aIn.read();
+			m2 += mult.aIn2.read();
+			m3 += mult.currIn.read();
+		}
+		m1 /= 1000;
+		m2 /= 1000;
+		m3 /= 1000;
+		bt.printf("Ch1: %2.6f\r\n", m1); // Raw Ch1
+		wait_us(1000);
+		bt.printf("Ch2: %2.6f\r\n", m2); // Raw Ch2
+		wait_us(1000);
+		bt.printf("Ch3: %2.6f\r\n", m3); // Raw Curr
+		wait_us(1000);
+		bt.printf("Pot: %2.6f\r\n", mult.pot.read()); // Pot
+		wait_ms(1000);
+#endif
 		wait_ms(100);
 	}
 }

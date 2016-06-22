@@ -24,8 +24,8 @@ Multimetro mult;
 
 DigitalOut led_blue(LED_BLUE, 0); // So para mostrar que esta ligado
 
-// Serial     bt(USBTX, USBRX);
-Serial     bt(PTE0, PTE1);   // Bluetooth
+Serial     bt(USBTX, USBRX);
+// Serial     bt(PTE0, PTE1);   // Bluetooth
 
 int main() {
 	Wave wave1, wave2;

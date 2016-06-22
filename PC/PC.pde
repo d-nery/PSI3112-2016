@@ -233,7 +233,7 @@ class Canal {
                 text("Frequencia: "   + nf(wave[num-1].get("frequencia"), 0, 1) + "Hz", 0, 3*(tamlat)/5);
                 text("Valor Eficaz: " + nf(wave[num-1].get("Vrms"),       0, 2) + "V",  0, 4*(tamlat)/5);
             } else {
-                text("Tensão DC: " + nf(wave[num-1].get("Vrms"),       0, 2) + "V",  0, 1*(tamlat)/2);
+                text("Tensão DC: " + nf(wave[num-1].get("Vrms"), 0, 2) + "V",  0, 1*(tamlat)/2);
             }
         popMatrix();
     }
@@ -288,10 +288,11 @@ class Info {
             translate(esquerda + 40, topo);
             if (input == AC_VOLT) {
                 text("Defasagem: " + nf(wave[1].get("def")) + "°", 0, 1*(tamlat)/3);
-                text("Impedancia: Ω", 0, 2*(tamlat)/3);
+                float impedancia = 1000*wave[0].get("amplitude")/wave[1].get("amplitude");
+                text("Impedancia: " + nf(impedancia, 0, 0) + "Ω", 0, 2*(tamlat)/3);
             }
             if (input == DC_CURR)
-                text("Corrente: " + nf(wave[0].get("Vrms")) + "mA", 0, 1*(tamlat)/2);
+                text("Corrente: " + nf(int(wave[0].get("Vrms")), 0, 0) + "mA", 0, 1*(tamlat)/2);
         popMatrix();
 
         textSize(32);
